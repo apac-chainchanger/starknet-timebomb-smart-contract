@@ -1,6 +1,7 @@
 #[starknet::contract]
 pub mod SurvivalGame {
     use starknet::ContractAddress;
+    use starknet::contract_address_const;
     use starknet::get_caller_address;
     use starknet::storage::Map;
     use core::pedersen::pedersen;
@@ -46,7 +47,7 @@ pub mod SurvivalGame {
             index: current_time,
             begin_time: current_time,
             end_time: current_time + duration,
-            last_correct_address: ContractAddress::zero(),
+            last_correct_address: contract_address_const::<0>(),
             total_amount: 0,
             status: SurvivalStatus::ACTIVE,
         };
