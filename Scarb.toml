@@ -14,6 +14,7 @@ assert_macros = "2.9.2"
 
 [[target.starknet-contract]]
 sierra = true
+casm = true
 
 [scripts]
 test = "snforge test"
@@ -32,7 +33,7 @@ test = "snforge test"
 
 # [[tool.snforge.fork]]
 # name = "SOME_SECOND_NAME"
-# url = "http://your.second.rpc.url"                         
+# url = "http://your.second.rpc.url"
 # block_id.number = "123"                                    # Block to fork from (block number)
 
 # [[tool.snforge.fork]]
