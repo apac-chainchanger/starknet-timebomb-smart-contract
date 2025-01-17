@@ -19,3 +19,31 @@ starkli deploy \
   0x034ba56f92265f0868c57d3fe72ecab144fc96f97954bbbc4252cef8e8a979ba \
   500
 ```
+
+## Flow
+```mermaid
+sequenceDiagram
+    participant USER as User
+    participant BE as Backend
+    participant SU as Survival Contract
+
+    USER ->> BE: [GET] Quiz
+    BE ->> BE: Quiz Init
+    BE ->> SU: Quiz ID Push
+    BE ->> USER: [GET] Quiz Response
+
+    USER ->> BE: [POST] Quiz
+    BE ->> BE: Grade Quiz
+
+    alt Correct Answer
+        BE ->> SU: Push Verifier Token
+        BE ->> USER: [POST] 200 OK Response with Token
+        SU ->> SU: Store Verifier Token
+        USER ->> SU: [Contract] Claim Transaction with Token and Deposit
+        SU ->> SU: State Update
+        SU ->> USER: [Contract] Transaction Success/Failure
+    else Wrong Answer
+        BE ->> USER: [POST] 204 Error Response
+        USER ->> BE: Retry with Another Answer
+    end
+```

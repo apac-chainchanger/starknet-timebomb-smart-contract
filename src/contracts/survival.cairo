@@ -1,3 +1,11 @@
+use crate::types::survival::Survival;
+
+#[starknet::interface]
+pub trait ISurvivalGame<TContractState> {
+    fn create_survival(ref self: TContractState, duration: u64) -> u256;
+    fn get_survival(self: @TContractState, survival_id: u256) -> Survival;
+}
+
 #[starknet::contract]
 pub mod SurvivalGame {
     use starknet::storage::{
@@ -89,34 +97,35 @@ pub mod SurvivalGame {
         self.fee_percentage.write(fee_percentage);
     }
 
-    #[external(v0)]
-    fn create_survival(ref self: ContractState, duration: u64) -> u256 {
-        assert(get_caller_address() == self.backend_address.read(), 'UNAUTHORIZED');
+    #[abi(embed_v0)]
+    pub impl SurvivalGameImpl of super::ISurvivalGame<ContractState> {
+        fn create_survival(ref self: ContractState, duration: u64) -> u256 {
+            assert(get_caller_address() == self.backend_address.read(), 'UNAUTHORIZED');
 
-        let current_time = starknet::get_block_timestamp();
-        let caller = get_caller_address();
+            let current_time = starknet::get_block_timestamp();
+            let caller = get_caller_address();
 
-        let survival_id = pedersen(current_time.into(), caller.into());
+            let survival_id = pedersen(current_time.into(), caller.into());
 
-        let new_survival = Survival {
-            id: survival_id.into(),
-            index: current_time,
-            begin_time: current_time,
-            end_time: current_time + duration,
-            last_correct_address: contract_address_const::<0>(),
-            total_amount: 0,
-            status: SurvivalStatus::ACTIVE,
-        };
+            let new_survival = Survival {
+                id: survival_id.into(),
+                index: current_time,
+                begin_time: current_time,
+                end_time: current_time + duration,
+                last_correct_address: contract_address_const::<0>(),
+                total_amount: 0,
+                status: SurvivalStatus::ACTIVE,
+            };
 
-        self.set_survival(survival_id.into(), new_survival);
+            self.set_survival(survival_id.into(), new_survival);
 
-        self.emit_survival_begin(survival_id.into(), current_time, current_time + duration);
+            self.emit_survival_begin(survival_id.into(), current_time, current_time + duration);
 
-        survival_id.into()
-    }
+            survival_id.into()
+        }
 
-    #[external(v0)]
-    fn get_survival(self: @ContractState, survival_id: u256) -> Survival {
-        self.get_survival(survival_id)
+        fn get_survival(self: @ContractState, survival_id: u256) -> Survival {
+            StorageTrait::get_survival(self, survival_id)
+        }
     }
 }
